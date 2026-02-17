@@ -1,0 +1,63 @@
+-- Create database
+CREATE DATABASE college_db
+DEFAULT CHARACTER SET = utf8mb4;
+
+-- Select the database
+USE college_db;
+-- Create students table
+CREATE TABLE students (
+    student_id INT PRIMARY KEY,
+    name VARCHAR(50),
+    age INT,
+    course VARCHAR(50)
+);
+
+-- Create marks table
+CREATE TABLE marks (
+    mark_id INT PRIMARY KEY,
+    student_id INT,
+    score INT,
+    FOREIGN KEY (student_id) REFERENCES students(student_id)
+);
+
+-- Insert sample data
+INSERT INTO students VALUES
+(1, 'Rahul', 20, 'BCA'),
+(2, 'Anita', 21, 'BSc'),
+(3, 'Aman', 22, 'BCA'-),
+(4, 'Neha', 20, 'BCom'),
+(5, 'Ravi', 23, 'BCA');
+
+INSERT INTO marks VALUES
+(1, 1, 85),
+(2, 2, 90),
+(3, 3, 78),
+(4, 4, 88),
+(5, 5, 92);
+
+-- SELECT
+SELECT * FROM students;
+SELECT name, age FROM students;
+
+-- JOIN
+SELECT s.name, m.score
+FROM students s
+JOIN marks m
+ON s.student_id = m.student_id;
+
+-- GROUP BY
+SELECT course, COUNT(*) AS total_students
+FROM students
+GROUP BY course;
+
+-- DELETE (example)
+DELETE FROM students
+WHERE student_id = 5;
+
+-- ALTER
+ALTER TABLE students ADD email VARCHAR(100);
+ALTER TABLE students MODIFY age INT;
+ALTER TABLE students RENAME COLUMN name TO full_name;
+
+-- DROP (example)
+DROP TABLE marks;
