@@ -1,0 +1,104 @@
+-- ==============================
+-- 1️⃣ Create Database
+-- ==============================
+CREATE DATABASE IF NOT EXISTS pizza_sales_db;
+USE pizza_sales_db;
+
+-- ==============================
+-- 2️⃣ Create Tables
+-- ==============================
+
+-- Orders Table
+CREATE TABLE IF NOT EXISTS orders (
+    order_id INT PRIMARY KEY,
+    order_date DATE,
+    order_time TIME
+);
+
+-- Order Details Table
+CREATE TABLE IF NOT EXISTS order_details (
+    order_details_id INT PRIMARY KEY,
+    order_id INT,
+    pizza_id VARCHAR(50),
+    quantity INT,
+    FOREIGN KEY (order_id) REFERENCES orders(order_id)
+);
+
+-- Pizzas Table
+CREATE TABLE IF NOT EXISTS pizzas (
+    pizza_id VARCHAR(50) PRIMARY KEY,
+    pizza_type_id VARCHAR(50),
+    size VARCHAR(5),
+    price DECIMAL(6,2)
+);
+
+-- Pizza Types Table
+CREATE TABLE IF NOT EXISTS pizza_types (
+    pizza_type_id VARCHAR(50) PRIMARY KEY,
+    name VARCHAR(100),
+    category VARCHAR(50)
+);
+
+-- ==============================
+-- 3️⃣ Business Queries + Insights
+-- ==============================
+
+-- 1️⃣ Total Revenue
+-- Insight: Measures overall financial performance for planning growth and promotions
+SELECT 
+    SUM(od.quantity * p.price) AS total_revenue
+FROM order_details od
+JOIN pizzas p ON od.pizza_id = p.pizza_id;
+
+-- 2️⃣ Top 5 Revenue-Generating Pizzas
+-- Insight: Identify best products for marketing and stock prioritization
+SELECT 
+    pt.name,
+    SUM(od.quantity * p.price) AS revenue
+FROM order_details od
+JOIN pizzas p ON od.pizza_id = p.pizza_id
+JOIN pizza_types pt ON p.pizza_type_id = pt.pizza_type_id
+GROUP BY pt.name
+ORDER BY revenue DESC
+LIMIT 5;
+
+-- 3️⃣ Sales by Category
+-- Insight: Shows which categories dominate and which need improvement
+SELECT 
+    pt.category,
+    SUM(od.quantity) AS total_quantity,
+    SUM(od.quantity * p.price) AS revenue
+FROM order_details od
+JOIN pizzas p ON od.pizza_id = p.pizza_id
+JOIN pizza_types pt ON p.pizza_type_id = pt.pizza_type_id
+GROUP BY pt.category
+ORDER BY revenue DESC;
+
+-- 4️⃣ Busiest Day of the Week
+-- Insight: Helps optimize staffing, inventory, and weekend promotions
+SELECT 
+    DAYNAME(o.order_date) AS day_name,
+    SUM(od.quantity) AS total_sold
+FROM orders o
+JOIN order_details od ON o.order_id = od.order_id
+GROUP BY day_name
+ORDER BY total_sold DESC;
+
+-- 5️⃣ Above-Average Selling Pizzas (Subquery)
+-- Insight: Highlight high-performing pizzas for promotions and bundles
+SELECT 
+    pt.name,
+    SUM(od.quantity) AS total_sold
+FROM order_details od
+JOIN pizzas p ON od.pizza_id = p.pizza_id
+JOIN pizza_types pt ON p.pizza_type_id = pt.pizza_type_id
+GROUP BY pt.name
+HAVING SUM(od.quantity) >
+    (
+        SELECT AVG(total_qty)
+        FROM (
+            SELECT SUM(quantity) AS total_qty
+            FROM order_details
+            GROUP BY pizza_id
+        ) AS avg_table
+    );
