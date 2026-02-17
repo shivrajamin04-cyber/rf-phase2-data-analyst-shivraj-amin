@@ -1,0 +1,42 @@
+aimport pandas as pd
+
+# Create a small dirty dataset
+data = {
+    "id": [1, 2, 3, 4, 5],
+    "name": ["Rahul", "Anita", None, "Neha", "123"],
+    "age": [20, None, -5, 200, 22],
+    "course": ["BCA", "BSc", "BCA", None, "BCom"],
+    "marks": [85, "absent", 78, None, -10]
+}
+
+df = pd.DataFrame(data)
+
+# Save dirty data
+df.to_csv("students_dirty.csv", index=False)
+
+print("Dirty Data:\n", df)
+
+import pandas as pd
+
+# Load dirty 
+df = pd.read_csv("students_dirty.csv")
+
+# Replace wrong names (numbers) with NaN
+df["name"] = df["name"].apply(lambda x: None if str(x).isdigit() else x)
+
+# Convert marks to numeric (invalid → NaN)
+df["marks"] = pd.to_numeric(df["marks"], errors="coerce")
+
+# Replace invalid ages (negative or too high) with NaN
+df["age"] = df["age"].apply(lambda x: None if x < 0 or x > 100 else x)
+
+# Fill missing values
+df["name"].fillna("Unknown", inplace=True)
+df["age"].fillna(df["age"].mean(), inplace=True)
+df["course"].fillna("Not Assigned", inplace=True)
+df["marks"].fillna(0, inplace=True)
+
+# Save clean data
+df.to_csv("students_clean.csv", index=False)
+
+print("\nClean Data:\n", df)
