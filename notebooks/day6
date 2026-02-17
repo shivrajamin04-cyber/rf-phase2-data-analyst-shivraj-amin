@@ -1,0 +1,18 @@
+import numpy as np
+from scipy import stats
+
+# Sample data: conversion rates (%) for two versions of a webpage
+group_A = [1, 0, 1, 1, 0, 0, 1, 1, 0, 1]  # 1 = converted, 0 = not converted
+group_B = [0, 1, 0, 0, 0, 1, 0, 0, 1, 0]
+
+# Perform two-sample t-test
+t_stat, p_value = stats.ttest_ind(group_A, group_B)
+
+print("T-statistic:", t_stat)
+print("P-value:", p_value)
+
+# Interpretation
+if p_value < 0.05:
+    print("Result: Statistically significant difference between A and B")
+else:
+    print("Result: No statistically significant difference between A and B")
