@@ -5,7 +5,7 @@ Data Analyst
 
 ## Dataset / Source Links
 - Primary Dataset: Kaggle Dataset  
-- Note: All screenshots, charts, and visual materials are saved in the assets folder.
+- All screenshots, charts, and visual materials are available in the assets folder: ./assets
 
 ## Tools Used
 Python, SQL, Tableau, Excel, Power BI
