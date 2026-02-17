@@ -1,0 +1,12 @@
+import numpy as np
+from scipy import stats
+
+# Sample data: scores of two groups
+group1 = [23, 21, 19, 24, 30]
+group2 = [30, 28, 27, 35, 40]
+
+# Perform independent two-sample t-test
+t_stat, p_value = stats.ttest_ind(group1, group2)
+
+print("T-statistic:", t_stat)
+print("P-value:", p_value)
