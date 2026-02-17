@@ -1,0 +1,90 @@
+import pandas as pd
+import numpy as np
+# ==============================
+# 1. Load Dataset
+# ==============================
+df = pd.read_csv("pizza_sales.csv")
+# ==============================
+# 2. Clean Column Names
+# ==============================
+df.columns = (
+    df.columns
+    .str.strip()
+    .str.lower()
+    .str.replace(" ", "_", regex=False)
+)
+df.drop_duplicates(inplace=True)
+# ==============================
+# 3. Convert Data Types
+# ==============================
+if 'order_date' in df.columns:
+    df['order_date'] = pd.to_datetime(df['order_date'], errors='coerce')
+
+if 'order_time' in df.columns:
+    df['order_time'] = pd.to_datetime(
+        df['order_time'],
+        format='%H:%M:%S',
+        errors='coerce'
+    ).dt.time
+numeric_cols = ['quantity', 'unit_price', 'total_price']
+for col in numeric_cols:
+    if col in df.columns:
+        df[col] = (
+            df[col]
+            .astype(str)
+            .str.replace('$', '', regex=False)
+            .str.replace(',', '', regex=False)
+        )
+        df[col] = pd.to_numeric(df[col], errors='coerce')
+
+df.dropna(inplace=True)
+# ==============================
+# 4. Feature Engineering
+# ==============================
+if {'quantity', 'unit_price'}.issubset(df.columns):
+    df['revenue'] = df['quantity'] * df['unit_price']
+
+if 'order_date' in df.columns:
+    df['month'] = df['order_date'].dt.month
+    df['day_name'] = df['order_date'].dt.day_name()
+
+if 'order_time' in df.columns:
+    df['hour'] = pd.to_datetime(df['order_time'], format='%H:%M:%S', errors='coerce').dt.hour
+# ==============================
+# ==============================
+# 📊 BUSINESS QUESTIONS
+# ==============================
+# ==============================
+print("\n========== BUSINESS INSIGHTS ==========\n")
+# 1️⃣ What is the total revenue?
+total_revenue = df['revenue'].sum()
+print(f"1️⃣ Total Revenue: ${total_revenue:,.2f}")
+# 2️⃣ Which pizza generates the highest revenue?
+if 'pizza_name' in df.columns:
+    top_pizza = df.groupby('pizza_name')['revenue'].sum().sort_values(ascending=False).head(1)
+    print("\n2️⃣ Top Revenue Generating Pizza:")
+    print(top_pizza)
+
+# 3️⃣ Which day has the highest sales?
+top_day = df.groupby('day_name')['revenue'].sum().sort_values(ascending=False).head(1)
+print("\n3️⃣ Day with Highest Revenue:")
+print(top_day)
+
+# 4️⃣ What is the busiest hour of the day?
+if 'hour' in df.columns:
+    busiest_hour = df.groupby('hour')['quantity'].sum().sort_values(ascending=False).head(1)
+    print("\n4️⃣ Busiest Hour (Highest Quantity Sold):")
+    print(busiest_hour)
+
+# 5️⃣ Which pizza category sells the most?
+if 'pizza_category' in df.columns:
+    top_category = df.groupby('pizza_category')['quantity'].sum().sort_values(ascending=False).head(1)
+    print("\n5️⃣ Best Selling Pizza Category (by Quantity):")
+    print(top_category)
+
+# ==============================
+# Save cleaned dataset
+# ==============================
+df.to_csv("pizza_sales_cleaned.csv", index=False)
+
+
